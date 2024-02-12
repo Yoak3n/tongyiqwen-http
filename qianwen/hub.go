@@ -70,7 +70,7 @@ func Ask(id string, preset string, question string) string {
 		return NewConversation(id, preset, question)
 	} else if question == "/reset" || question == "/重置" {
 		delete(convs.Sub, id)
-		return "Conversation reset！"
+		return "Conversation reset!"
 	} else {
 		return ContinueConversation(id, question)
 	}

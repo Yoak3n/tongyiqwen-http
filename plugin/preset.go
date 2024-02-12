@@ -22,6 +22,7 @@ func init() {
 	p.AddConfigPath(".")
 	p.AddConfigPath("../")
 	err := p.ReadInConfig()
+	p.WatchConfig()
 	if err != nil {
 		return
 	}
