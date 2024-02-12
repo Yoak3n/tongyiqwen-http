@@ -1,0 +1,12 @@
+version: "3"
+services:
+  anime-repository-web:
+    image: yoaken/tongyiqwen-http
+    container_name: tongyiqianwen
+    ports:
+      - "20104:20104"
+    volumes:
+      - ./config.yml:/app/tongyiqianwen/config.yml
+      - ./preset.json:/app/tongyiqianwen/preset.json
+    environment:
+      - GIN_MODE=release
