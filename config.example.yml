@@ -1,0 +1,6 @@
+# reference：https://help.aliyun.com/document_detail/2587494.html?spm=a2c4g.2587492.0.0.553c7cdcwe5yka
+access_key: xxxxxxxxxxxxxxxx
+access_secret_key: xxxxxxxxxxxxxxxx
+agent_key: xxxxxxxxxxxxxxxx
+app_id: xxxxxxxxxxxxxxxx
+port: 20104 # server port
