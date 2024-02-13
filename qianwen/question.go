@@ -32,10 +32,8 @@ func makeQuestionBody(msg []model.Message) []byte {
 	}
 	b, err := json.Marshal(body)
 	if err != nil {
-		fmt.Println(err)
 		return []byte(err.Error())
 	}
-	fmt.Println(string(b))
 	buf := bytes.NewBuffer(b)
 	req, err := http.NewRequest("POST", QianwenApiUrl, buf)
 	if err != nil {
@@ -72,17 +70,4 @@ func makeQuestionBody(msg []model.Message) []byte {
 			return content
 		}
 	}
-	//fmt.Println(conf.Token)
-	//res, err := client.Do(req)
-	//if err != nil {
-	//	return nil
-	//}
-	//defer res.Body.Close()
-	//content, err = io.ReadAll(res.Body)
-
-	//result := new(ResponseBody)
-	//fmt.Println(string(content))
-	//jResult := gjson.Parse(string(content))
-	//choice := jResult.Get("Data.Choice").Array()[0].Get("Message")
-
 }

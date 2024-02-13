@@ -12,8 +12,8 @@ var r *gin.Engine
 func RunRouter() {
 	r = gin.Default()
 	v1 := r.Group("/v1")
-	chat := v1.Group("/chat")
-	chat.POST("/completions", api.Ask)
+	v1.POST("/chat", api.Ask)
+	v1.POST("/preset", api.Upload)
 	err := r.Run(fmt.Sprintf(":%d", config.GetConfig().Port))
 	if err != nil {
 		return

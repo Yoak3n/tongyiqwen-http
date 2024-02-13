@@ -63,6 +63,28 @@ func LoadMapPreset(name string) ([]model.Message, error) {
 	return messages, nil
 }
 
+func PushNewTextPreset(name string, content string) error {
+	p.Set(name, content)
+	err := p.SafeWriteConfig()
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func PushNewMapPreset(name string, Map []model.Message) error {
+	p.Set(name, Map)
+	err := p.SafeWriteConfig()
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func GetPresetViper() *viper.Viper {
+	return p
+}
+
 func GetPreset() *Preset {
 	return preset
 }
