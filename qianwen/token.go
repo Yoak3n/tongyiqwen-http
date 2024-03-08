@@ -17,7 +17,8 @@ func CreateToken() {
 
 	option := &openapi.Config{AccessKeyId: &accessKeyId,
 		AccessKeySecret: &accessKeySecret,
-		Endpoint:        &endpoint}
+		Endpoint:        &endpoint,
+	}
 
 	tokenClient, err := apiClient.NewClient(option)
 	if err != nil {

@@ -16,7 +16,7 @@ func Upload(c *gin.Context) {
 	if preset.Type == "text" {
 		err = plugin.PushNewTextPreset(preset.Name, preset.Content)
 		if err != nil {
-			c.String(500, "Internal Server Error")
+			c.String(500, "Internal Server Error:%v", err)
 		}
 		c.String(200, "text")
 	} else if preset.Type == "map" {

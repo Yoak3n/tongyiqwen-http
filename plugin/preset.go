@@ -28,7 +28,7 @@ func init() {
 	}
 }
 
-// LoadTextPreset 后续可以考虑自定义消息预设
+// LoadTextPreset 从preset.json中加载字符串预设
 func LoadTextPreset(name string) (string, error) {
 	b := p.GetString(name)
 	preset = &Preset{Prompt: b}
@@ -38,6 +38,7 @@ func LoadTextPreset(name string) (string, error) {
 	return b, nil
 }
 
+// LoadMapPreset 从preset.json中加载消息预设
 func LoadMapPreset(name string) ([]model.Message, error) {
 	file, err := os.ReadFile("preset.json")
 	if err != nil {
@@ -65,7 +66,7 @@ func LoadMapPreset(name string) ([]model.Message, error) {
 
 func PushNewTextPreset(name string, content string) error {
 	p.Set(name, content)
-	err := p.SafeWriteConfig()
+	err := p.WriteConfig()
 	if err != nil {
 		return err
 	}
@@ -74,17 +75,9 @@ func PushNewTextPreset(name string, content string) error {
 
 func PushNewMapPreset(name string, Map []model.Message) error {
 	p.Set(name, Map)
-	err := p.SafeWriteConfig()
+	err := p.WriteConfig()
 	if err != nil {
 		return err
 	}
 	return nil
-}
-
-func GetPresetViper() *viper.Viper {
-	return p
-}
-
-func GetPreset() *Preset {
-	return preset
 }

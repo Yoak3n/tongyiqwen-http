@@ -47,7 +47,8 @@ func GetConfig() *Config {
 
 func RefreshToken(token string) {
 	v.Set("token", token)
-	err := v.SafeWriteConfig()
+	conf.Token = token
+	err := v.WriteConfig()
 	if err != nil {
 		return
 	}
