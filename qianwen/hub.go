@@ -2,6 +2,7 @@ package qianwen
 
 import (
 	"github.com/tidwall/gjson"
+	"log"
 	"tongyiqwen/package/model"
 	"tongyiqwen/plugin"
 )
@@ -41,13 +42,19 @@ func NewConversation(id string, preset string, question string) string {
 	newMsg = append(newMsg, model.Message{Role: "user", Content: question})
 	convs.Sub[id] = newMsg
 	answer := makeQuestionBody(newMsg)
+	log.Println(string(answer))
 	jResult := gjson.Parse(string(answer))
-	reply := jResult.Get("Data.Choices").Array()[0].Get("Message.Content").String()
-	convs.Sub[id] = append(convs.Sub[id], model.Message{
-		Role:    "assistant",
-		Content: reply,
-	})
-	return reply
+	reply := jResult.Get("Data.Choices").Array()
+	if len(reply) > 0 {
+		r := reply[0].Get("Message.Content").String()
+		convs.Sub[id] = append(convs.Sub[id], model.Message{
+			Role:    "assistant",
+			Content: r,
+		})
+		return r
+	} else {
+		return jResult.Get("Message").String()
+	}
 }
 
 func ContinueConversation(id string, question string) string {
