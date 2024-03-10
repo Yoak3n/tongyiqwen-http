@@ -23,6 +23,7 @@ func init() {
 	conf = new(Config)
 	v.SetConfigType("yaml")
 	v.AddConfigPath(".")
+	v.SetDefault("port", 20104)
 	err := v.ReadInConfig()
 	if err != nil {
 		return
