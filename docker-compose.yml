@@ -6,7 +6,7 @@ services:
     ports:
       - "20104:20104"
     volumes:
-      - ./config.yml:/app/tongyiqwen/config.yml
+      - ./config.yaml:/app/tongyiqwen/config.yaml
       - ./preset.json:/app/tongyiqwen/preset.json
     environment:
       - GIN_MODE=release

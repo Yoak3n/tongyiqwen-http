@@ -16,7 +16,7 @@ func Ask(c *gin.Context) {
 	}
 	// 处理请求
 	receive := time.Now()
-	answer := qianwen.Ask(req.Id, "", req.Content)
+	answer := qianwen.Ask(req.Id, req.Preset, req.Content)
 	c.JSON(200, gin.H{
 		"answer": answer,
 		"id":     req.Id,
