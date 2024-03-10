@@ -15,6 +15,6 @@ WORKDIR /app/tongyiqwen
 COPY --from=builder /app/tongyiqwen/main main
 COPY --from=builder /app/tongyiqwen/config.example.yaml config.yaml
 COPY --from=builder /etc/ssl/certs/ /etc/ssl/certs/
-COPY --from=build /usr/share/zoneinfo /usr/share/zoneinfo
+COPY --from=builder /usr/share/zoneinfo /usr/share/zoneinfo
 EXPOSE 20104
 CMD ["./main"]
