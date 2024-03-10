@@ -1,6 +1,6 @@
 version: "3"
 services:
-  anime-repository-web:
+  tongyiqwen-http:
     image: yoaken/tongyiqwen-http
     container_name: tongyiqianwen
     ports:
