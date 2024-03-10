@@ -10,11 +10,12 @@ RUN go build -o main
 
 FROM scratch as runtime
 LABEL authors="Yoake"
-ENV TZ=Asia/Shanghai
+ENV TZ=GMT
 WORKDIR /app/tongyiqwen
 COPY --from=builder /app/tongyiqwen/main main
 COPY --from=builder /app/tongyiqwen/config.example.yaml config.yaml
 COPY --from=builder /etc/ssl/certs/ /etc/ssl/certs/
 COPY --from=builder /usr/share/zoneinfo /usr/share/zoneinfo
+COPY --from=builder /usr/share/zoneinfo/Etc/GMT /etc/localtime
 EXPOSE 20104
 CMD ["./main"]
