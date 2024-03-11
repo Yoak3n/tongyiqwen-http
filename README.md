@@ -29,7 +29,7 @@ Post `/v1/preset` with text to define a shorted preset
 }
 ```
 
-Post `/v1/preset` with map to upload openai-style preset(Note the capitalized beginnings of fields)
+Post `/v1/preset` with map to upload openai-style preset(Note the capitalized beginnings of fields for Tongyiqianwen)
 ```json
 {
     "name":"translator",
@@ -42,7 +42,7 @@ Post `/v1/preset` with map to upload openai-style preset(Note the capitalized be
 }
 ```
 
-Get `v1/preset` return a json data
+Get `/v1/preset` return a json data
 ```json
 {
   "data": {
