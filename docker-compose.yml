@@ -10,3 +10,4 @@ services:
       - ./preset.json:/app/tongyiqwen/preset.json
     environment:
       - GIN_MODE=release
+      - TZ=UTC+8 # avoid timestamp expiration due to different time zones with Aliyun

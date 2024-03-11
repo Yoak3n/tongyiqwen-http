@@ -14,7 +14,7 @@ func Upload(c *gin.Context) {
 	}
 
 	if preset.Type == "text" {
-		err = plugin.PushNewTextPreset(preset.Name, preset.Content)
+		err = plugin.PushNewTextPreset(preset.Name, preset.Text)
 		if err != nil {
 			c.String(500, "Internal Server Error:%v", err)
 		}
@@ -26,4 +26,14 @@ func Upload(c *gin.Context) {
 		c.String(400, "Bad Request")
 	}
 
+}
+
+func GetPreset(c *gin.Context) {
+	preset, err := plugin.GetAllPreset()
+	if err != nil {
+		c.String(400, err.Error())
+	}
+	c.JSON(200, gin.H{
+		"data": preset,
+	})
 }

@@ -19,7 +19,6 @@ func genRequestId() string {
 }
 
 func makeQuestionBody(msg []model.Message) []byte {
-
 	conf := config.GetConfig()
 	client := http.Client{Timeout: time.Second * 120}
 	body := &RequestBody{
@@ -44,30 +43,24 @@ func makeQuestionBody(msg []model.Message) []byte {
 	//req.Header.Set("Accept", "text/event-stream")
 	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", conf.Token))
 	content := make([]byte, 0)
-	count := 0
 	// 为了防止token过期，这里需要重试
-	for {
-		count++
-		if count > 10 {
-			return []byte("重试次数过多，退出")
-		}
-		res, e := client.Do(req)
-		if e != nil {
-			return []byte(err.Error())
-		}
-		if res.StatusCode != http.StatusOK {
-			res.Body.Close()
-			CreateToken()
-			time.Sleep(time.Second * 5)
-			continue
-		}
-		content, e = io.ReadAll(res.Body)
-		if err != nil {
-			res.Body.Close()
-			return []byte(err.Error())
-		} else {
-			res.Body.Close()
-			return content
-		}
+
+	res, e := client.Do(req)
+	if e != nil {
+		return []byte(err.Error())
 	}
+	if res.StatusCode != http.StatusOK {
+		res.Body.Close()
+		CreateToken()
+		time.Sleep(time.Second)
+	}
+	content, e = io.ReadAll(res.Body)
+	if err != nil {
+		res.Body.Close()
+		return []byte(err.Error())
+	} else {
+		res.Body.Close()
+		return content
+	}
+
 }

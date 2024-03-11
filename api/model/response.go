@@ -9,8 +9,8 @@ type RequestBody struct {
 }
 
 type UploadPreset struct {
-	Name    string          `json:"name"`
-	Type    string          `json:"type"`
-	Content string          `json:"content,omitempty"`
-	Map     []model.Message `json:"map,omitempty"`
+	Name string          `json:"name"`
+	Type string          `json:"type"`
+	Text string          `json:"text,omitempty"`
+	Map  []model.Message `json:"map,omitempty"`
 }

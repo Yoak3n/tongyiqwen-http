@@ -26,3 +26,11 @@ func TestLoadMapPreset(t *testing.T) {
 	}
 
 }
+
+func TestGetAllPreset(t *testing.T) {
+	allPreset, err := GetAllPreset()
+	if err != nil {
+		t.Error(err)
+	}
+	t.Log(allPreset)
+}

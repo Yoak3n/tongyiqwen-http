@@ -24,3 +24,8 @@ func Ask(c *gin.Context) {
 	})
 
 }
+
+// AskCompletions TODO
+func AskCompletions(c *gin.Context) {
+
+}

@@ -1,9 +1,9 @@
 package qianwen
 
 import (
+	"errors"
 	"fmt"
 	"github.com/tidwall/gjson"
-	"log"
 	"time"
 	"tongyiqwen/package/model"
 	"tongyiqwen/plugin"
@@ -46,19 +46,18 @@ func NewConversation(id string, preset string, question string) string {
 		return fmt.Sprintf("Load preset %s successfully", preset)
 	}
 	newMsg = append(newMsg, model.Message{Role: "user", Content: question})
-	answer := makeQuestionBody(newMsg)
-	log.Println(string(answer))
-	jResult := gjson.Parse(string(answer))
-	reply := jResult.Get("Data.Choices").Array()
-	if len(reply) > 0 {
-		r := reply[0].Get("Message.Content").String()
-		convs.Sub[id] = append(convs.Sub[id], model.Message{
-			Role:    "assistant",
-			Content: r,
-		})
-		return r
-	} else {
-		return jResult.Get("Message").String()
+	count := 0
+	for {
+		if count > 3 {
+			return "API令牌认证失败"
+		}
+		count++
+		answer := makeQuestionBody(newMsg)
+		reply, err := checkAndRefresh(answer, id)
+		if err != nil {
+			continue
+		}
+		return reply
 	}
 }
 
@@ -67,15 +66,38 @@ func ContinueConversation(id string, question string) string {
 		{Role: "user", Content: question},
 	}
 	convs.Sub[id] = append(convs.Sub[id], newMsg...)
-	answer := makeQuestionBody(convs.Sub[id])
-	jResult := gjson.Parse(string(answer))
-	reply := jResult.Get("Data.Choices").Array()[0].Get("Message.Content").String()
-	convs.Sub[id] = append(convs.Sub[id], model.Message{
-		Role:    "assistant",
-		Content: reply,
-	})
-	convs.Update[id] = time.Now().Unix()
-	return reply
+	count := 0
+	for {
+		if count > 3 {
+			return "API令牌认证失败"
+		}
+		count++
+		answer := makeQuestionBody(convs.Sub[id])
+		reply, err := checkAndRefresh(answer, id)
+		if err != nil {
+			continue
+		}
+		return reply
+	}
+
+}
+
+func checkAndRefresh(answer []byte, id string) (string, error) {
+	jResult := gjson.ParseBytes(answer)
+	reply := jResult.Get("Data.Choices").Array()
+	if reply != nil {
+		r := reply[0].Get("Message.Content").String()
+		convs.Sub[id] = append(convs.Sub[id], model.Message{
+			Role:    "assistant",
+			Content: r,
+		})
+		convs.Update[id] = time.Now().Unix()
+		return r, nil
+	} else {
+		CreateToken()
+		time.Sleep(time.Second)
+		return "", errors.New(jResult.Get("Message").String())
+	}
 }
 
 func Ask(id string, preset string, question string) string {
@@ -92,4 +114,9 @@ func Ask(id string, preset string, question string) string {
 	} else {
 		return ContinueConversation(id, question)
 	}
+}
+
+// AskWithOpenAIStyle TODO
+func AskWithOpenAIStyle() {
+
 }

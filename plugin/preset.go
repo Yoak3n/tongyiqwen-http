@@ -81,3 +81,7 @@ func PushNewMapPreset(name string, Map []model.Message) error {
 	}
 	return nil
 }
+
+func GetAllPreset() (map[string]any, error) {
+	return p.AllSettings(), nil
+}
