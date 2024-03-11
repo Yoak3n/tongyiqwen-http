@@ -1,3 +1,7 @@
+<p align="center"><a href="https://hub.docker.com/r/yoaken/tongyiqwen-http"><img src="https://img.shields.io/docker/pulls/yoaken/tongyiqwen-http?&logo=docker" alt="Docker Pulls"></a>
+<a href="./LICENSE"><img src="https://img.shields.io/github/license/Yoak3n/tongyiqwen-http" alt="License"></a></p>
+
+
 ## Preparation
 type Aliyun large model authorization keys in `config.yaml`,reference `config.example.yaml`
 
