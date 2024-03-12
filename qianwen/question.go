@@ -55,6 +55,7 @@ func makeQuestionBody(msg []model.Message) []byte {
 		time.Sleep(time.Second)
 	}
 	content, e = io.ReadAll(res.Body)
+	fmt.Println(string(content))
 	if err != nil {
 		res.Body.Close()
 		return []byte(err.Error())

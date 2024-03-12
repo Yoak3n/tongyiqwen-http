@@ -46,14 +46,14 @@ func NewConversation(id string, preset string, question string) string {
 	if question == "" {
 		return fmt.Sprintf("Load preset %s successfully", preset)
 	}
-	newMsg = append(newMsg, model.Message{Role: "user", Content: question})
+	convs.Sub[id] = append(newMsg, model.Message{Role: "user", Content: question})
 	count := 0
 	for {
 		if count > 3 {
 			return "API令牌认证失败"
 		}
 		count++
-		answer := makeQuestionBody(newMsg)
+		answer := makeQuestionBody(convs.Sub[id])
 		reply, err := checkAndRefresh(answer, id)
 		if err != nil {
 			continue
@@ -67,6 +67,8 @@ func ContinueConversation(id string, question string) string {
 		{Role: "user", Content: question},
 	}
 	convs.Sub[id] = append(convs.Sub[id], newMsg...)
+	fmt.Println(convs.Sub[id])
+	convs.Update[id] = time.Now().Unix()
 	count := 0
 	for {
 		if count > 3 {
@@ -86,7 +88,7 @@ func ContinueConversation(id string, question string) string {
 func checkAndRefresh(answer []byte, id string) (string, error) {
 	jResult := gjson.ParseBytes(answer)
 	reply := jResult.Get("Data.Choices").Array()
-	if reply != nil {
+	if len(reply) > 0 {
 		r := reply[0].Get("Message.Content").String()
 		convs.Sub[id] = append(convs.Sub[id], model.Message{
 			Role:    "assistant",
