@@ -4,7 +4,7 @@ import "tongyiqwen/package/model"
 
 type RequestBody struct {
 	Id      string `json:"id"`
-	Preset  string `json:"preset"`
+	Preset  string `json:"preset,omitempty"`
 	Content string `json:"content"`
 }
 

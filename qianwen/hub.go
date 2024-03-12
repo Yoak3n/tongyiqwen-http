@@ -21,6 +21,7 @@ var convs *Conversations
 func init() {
 	convs = new(Conversations)
 	convs.Sub = make(map[string][]model.Message)
+	convs.Update = make(map[string]int64)
 }
 
 func NewConversation(id string, preset string, question string) string {
