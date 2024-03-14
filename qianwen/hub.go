@@ -71,14 +71,13 @@ func ContinueConversation(id string, question string) string {
 	convs.Update[id] = time.Now().Unix()
 	count := 0
 	for {
-		if count > 3 {
-			return "API令牌认证失败"
-		}
 		count++
 		answer := makeQuestionBody(convs.Sub[id])
 		reply, err := checkAndRefresh(answer, id)
 		if err != nil {
-			continue
+			if count > 3 {
+				return err.Error()
+			}
 		}
 		return reply
 	}
@@ -103,6 +102,11 @@ func checkAndRefresh(answer []byte, id string) (string, error) {
 	}
 }
 
+func Reset(id string) {
+	delete(convs.Sub, id)
+	delete(convs.Update, id)
+}
+
 func Ask(id string, preset string, question string) string {
 	if _, ok := convs.Sub[id]; !ok {
 		return NewConversation(id, preset, question)
@@ -111,9 +115,6 @@ func Ask(id string, preset string, question string) string {
 		return NewConversation(id, preset, question)
 	} else if preset != "" {
 		return NewConversation(id, preset, question)
-	} else if question == "/reset" || question == "/重置" {
-		delete(convs.Sub, id)
-		return "Conversation reset!"
 	} else {
 		return ContinueConversation(id, question)
 	}

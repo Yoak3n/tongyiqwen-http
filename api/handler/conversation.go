@@ -22,7 +22,16 @@ func Ask(c *gin.Context) {
 		"id":     req.Id,
 		"cost":   fmt.Sprintf("%.2fs", time.Since(receive).Seconds()),
 	})
+}
 
+func Reset(c *gin.Context) {
+	id := c.Param("id")
+	if id != "" {
+		qianwen.Reset(id)
+		c.String(200, "Conversation(id:%s) reset!", id)
+	} else {
+		c.String(400, "Conversation id not found!")
+	}
 }
 
 // AskCompletions TODO

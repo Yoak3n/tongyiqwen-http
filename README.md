@@ -7,7 +7,7 @@ type Aliyun large model authorization keys in `config.yaml`,reference `config.ex
 
 ## Usage
 ### Ask
-Post `/v1/ask` with question to quickly ask tongyiqianwen 
+POST `/v1/ask` with question to quickly ask tongyiqianwen 
 ```json
 {
   "id": "test",
@@ -20,7 +20,7 @@ if `preset` is not blank,server will create a new conversation,so make it empty 
 if `preset` and `question` both exist, then will create a new conversation and ask the `question` 
 
 ### Preset
-Post `/v1/preset` with text to define a shorted preset
+POST `/v1/preset` with text to define a shorted preset
 ```json
 {
     "name":"translator",
@@ -29,7 +29,7 @@ Post `/v1/preset` with text to define a shorted preset
 }
 ```
 
-Post `/v1/preset` with map to upload openai-style preset(Note the capitalized beginnings of fields for Tongyiqianwen)
+POST `/v1/preset` with map to upload openai-style preset(Note the capitalized beginnings of fields for Tongyiqianwen)
 ```json
 {
     "name":"translator",
@@ -42,7 +42,7 @@ Post `/v1/preset` with map to upload openai-style preset(Note the capitalized be
 }
 ```
 
-Get `/v1/preset` return a json data
+GET `/v1/preset` return a json data
 ```json
 {
   "data": {
