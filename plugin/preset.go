@@ -5,7 +5,7 @@ import (
 	"github.com/spf13/viper"
 	"github.com/tidwall/gjson"
 	"os"
-	"tongyiqwen/package/model"
+	"tongyiqwen/package/ali_model"
 )
 
 type Preset struct {
@@ -39,7 +39,7 @@ func LoadTextPreset(name string) (string, error) {
 }
 
 // LoadMapPreset 从preset.json中加载消息预设
-func LoadMapPreset(name string) ([]model.Message, error) {
+func LoadMapPreset(name string) ([]ali_model.Message, error) {
 	file, err := os.ReadFile("preset.json")
 	if err != nil {
 		return nil, err
@@ -49,7 +49,7 @@ func LoadMapPreset(name string) ([]model.Message, error) {
 	if b == nil {
 		return nil, errors.New("not found preset")
 	}
-	messages := make([]model.Message, 0)
+	messages := make([]ali_model.Message, 0)
 	l := len(b)
 	for index, result := range b {
 		if index == l {
@@ -57,7 +57,7 @@ func LoadMapPreset(name string) ([]model.Message, error) {
 				break
 			}
 		}
-		message := model.Message{Role: result.Get("Role").String(), Content: result.Get("Content").String()}
+		message := ali_model.Message{Role: result.Get("Role").String(), Content: result.Get("Content").String()}
 		messages = append(messages, message)
 
 	}
@@ -73,7 +73,7 @@ func PushNewTextPreset(name string, content string) error {
 	return nil
 }
 
-func PushNewMapPreset(name string, Map []model.Message) error {
+func PushNewMapPreset(name string, Map []ali_model.Message) error {
 	p.Set(name, Map)
 	err := p.WriteConfig()
 	if err != nil {

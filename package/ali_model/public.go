@@ -1,6 +1,9 @@
-package qianwen
+package ali_model
 
-import "tongyiqwen/package/ali_model"
+type Message struct {
+	Role    string //system,user or assistant
+	Content string
+}
 
 type Parameters struct {
 	ResultFormat      string   `json:"ResultFormat,omitempty"`
@@ -15,21 +18,21 @@ type RequestBody struct {
 	RequestId  string `json:"RequestId"`
 	AppId      string `json:"AppId"`
 	Stream     bool   `json:"Stream"`
-	Messages   []ali_model.Message
+	Messages   []Message
 	TopP       float64     `json:"TopP,omitempty"`
 	Parameters *Parameters `json:"Parameters,omitempty"`
 }
 
 type Choice struct {
 	Index        int
-	Content      string
 	FinishReason string
-	Role         string
+	Message      *Message
 }
 
 type Usage struct {
 	InputTokens  int
 	OutputTokens int
+	ModelId      string
 }
 type ResponseBody struct {
 	Success   bool
@@ -38,6 +41,7 @@ type ResponseBody struct {
 	RequestId string
 	Data      struct {
 		ResponseId string
+		SessionId  string
 		Text       string
 		Choices    []Choice
 		Usage      []Usage

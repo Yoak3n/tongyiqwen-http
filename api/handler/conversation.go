@@ -4,7 +4,8 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"time"
-	api "tongyiqwen/api/model"
+	"tongyiqwen/api/model"
+	"tongyiqwen/package/openai_model"
 	"tongyiqwen/qianwen"
 )
 
@@ -36,5 +37,23 @@ func Reset(c *gin.Context) {
 
 // AskCompletions TODO
 func AskCompletions(c *gin.Context) {
+	//all, err := io.ReadAll(c.Request.Body)
+	//if err != nil {
+	//	return
+	//}
+	//defer c.Request.Body.Close()
+	//fmt.Println("body1:", string(all))
+	req := &openai_model.RequestBody{}
+	err := c.BindJSON(req)
+	if err != nil {
+		c.JSON(400, gin.H{"error": err.Error()})
+	}
+	//b, err := json.Marshal(req)
+	//fmt.Println("body2:", string(b))
+	res, err := qianwen.AskWithOpenAIStyle(req)
+	if err != nil {
+		c.JSON(400, gin.H{"error": err.Error()})
+	}
+	c.JSON(200, res)
 
 }

@@ -1,16 +1,21 @@
 package qianwen
 
 import (
+	"bytes"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/tidwall/gjson"
+	"net/http"
 	"time"
-	"tongyiqwen/package/model"
+	"tongyiqwen/config"
+	"tongyiqwen/package/ali_model"
+	"tongyiqwen/package/openai_model"
 	"tongyiqwen/plugin"
 )
 
 type Conversations struct {
-	Sub    map[string][]model.Message
+	Sub    map[string][]ali_model.Message
 	Update map[string]int64
 }
 
@@ -20,33 +25,33 @@ var convs *Conversations
 
 func init() {
 	convs = new(Conversations)
-	convs.Sub = make(map[string][]model.Message)
+	convs.Sub = make(map[string][]ali_model.Message)
 	convs.Update = make(map[string]int64)
 }
 
 func NewConversation(id string, preset string, question string) string {
-	newMsg := make([]model.Message, 0)
+	newMsg := make([]ali_model.Message, 0)
 	if preset != "" {
 		p, err := plugin.LoadTextPreset(preset)
 		if err != nil {
 			m, e := plugin.LoadMapPreset(preset)
 			if e != nil {
-				newMsg = append(newMsg, model.Message{Role: "system", Content: DefaultPreset})
+				newMsg = append(newMsg, ali_model.Message{Role: "system", Content: DefaultPreset})
 			} else {
 				newMsg = m
 			}
 		} else {
-			newMsg = append(newMsg, model.Message{Role: "system", Content: p})
+			newMsg = append(newMsg, ali_model.Message{Role: "system", Content: p})
 		}
 	} else {
-		newMsg = append(newMsg, model.Message{Role: "system", Content: DefaultPreset})
+		newMsg = append(newMsg, ali_model.Message{Role: "system", Content: DefaultPreset})
 	}
 	convs.Sub[id] = newMsg
 	convs.Update[id] = time.Now().Unix()
 	if question == "" {
 		return fmt.Sprintf("Load preset %s successfully", preset)
 	}
-	convs.Sub[id] = append(newMsg, model.Message{Role: "user", Content: question})
+	convs.Sub[id] = append(newMsg, ali_model.Message{Role: "user", Content: question})
 	count := 0
 	for {
 		if count > 3 {
@@ -63,7 +68,7 @@ func NewConversation(id string, preset string, question string) string {
 }
 
 func ContinueConversation(id string, question string) string {
-	newMsg := []model.Message{
+	newMsg := []ali_model.Message{
 		{Role: "user", Content: question},
 	}
 	convs.Sub[id] = append(convs.Sub[id], newMsg...)
@@ -89,7 +94,7 @@ func checkAndRefresh(answer []byte, id string) (string, error) {
 	reply := jResult.Get("Data.Choices").Array()
 	if len(reply) > 0 {
 		r := reply[0].Get("Message.Content").String()
-		convs.Sub[id] = append(convs.Sub[id], model.Message{
+		convs.Sub[id] = append(convs.Sub[id], ali_model.Message{
 			Role:    "assistant",
 			Content: r,
 		})
@@ -121,6 +126,94 @@ func Ask(id string, preset string, question string) string {
 }
 
 // AskWithOpenAIStyle TODO
-func AskWithOpenAIStyle() {
+func AskWithOpenAIStyle(data *openai_model.RequestBody) (*openai_model.ResponseBody, error) {
+	if data.Id == "" {
+		data.Id = genRequestId()
+	}
+	client := http.Client{Timeout: time.Second * 120}
 
+	conf := config.GetConfig()
+	body := &RequestBody{
+		Stream:    true,
+		RequestId: data.Id,
+		AppId:     conf.AppID,
+		Parameters: &Parameters{
+			ResultFormat: "text",
+		},
+	}
+	if data.Prompt != "" {
+		oip, _ := plugin.LoadTextPreset(data.Model)
+		body.Messages = append(body.Messages, ali_model.Message{
+			Role:    "system",
+			Content: oip,
+		}, ali_model.Message{
+			Role:    "user",
+			Content: data.Prompt,
+		})
+	} else {
+		for _, v := range data.Messages {
+			body.Messages = append(body.Messages, ali_model.Message{
+				Role:    v.Role,
+				Content: v.Content,
+			})
+		}
+	}
+
+	b, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	buf := bytes.NewBuffer(b)
+	req, err := http.NewRequest("POST", QianwenApiUrl, buf)
+	if err != nil {
+		fmt.Println(err)
+		return nil, err
+	}
+	//if data.Stream == true {
+	//	req.Header.Set("Accept", "text/event-stream")
+	//}else{
+	//
+	//}
+	//req.Header.Set("Accept", "text/event-stream")
+	req.Header.Set("Content-Type", "application/json;charset=UTF-8")
+	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", conf.Token))
+
+	res, e := client.Do(req)
+	if e != nil {
+		return nil, err
+	}
+	defer res.Body.Close()
+	content := make([]byte, 0)
+
+	fmt.Println(string(content))
+	resp := &ali_model.ResponseBody{}
+	err = json.Unmarshal(content, resp)
+	if len(resp.Data.Choices) <= 0 {
+		return nil, errors.New("no data")
+	}
+	message := &openai_model.ResponseBody{
+		FinishReason: resp.Data.Choices[0].FinishReason,
+		Object:       "chat.completion",
+		Id:           data.Id,
+		Model:        resp.Data.Usage[0].ModelId,
+		Text:         resp.Data.Choices[0].Message.Content,
+		Created:      time.Now().Unix(),
+		Usage: &openai_model.Usage{
+			PromptTokens:     resp.Data.Usage[0].InputTokens,
+			CompletionTokens: resp.Data.Usage[0].OutputTokens,
+			TotalTokens:      resp.Data.Usage[0].InputTokens + resp.Data.Usage[0].OutputTokens,
+		},
+	}
+	for _, v := range resp.Data.Choices {
+		choice := &openai_model.Choice{
+			Index:        v.Index,
+			FinishReason: v.FinishReason,
+			Message: openai_model.Message{
+				Content: v.Message.Content,
+				Role:    v.Message.Role,
+			},
+		}
+		message.Choices = append(message.Choices, choice)
+	}
+	return message, nil
 }

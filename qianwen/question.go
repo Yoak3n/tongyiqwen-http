@@ -9,7 +9,7 @@ import (
 	"net/http"
 	"time"
 	"tongyiqwen/config"
-	"tongyiqwen/package/model"
+	"tongyiqwen/package/ali_model"
 )
 
 const QianwenApiUrl = "https://bailian.aliyuncs.com/v2/app/completions"
@@ -18,7 +18,7 @@ func genRequestId() string {
 	return uuid.New().String()
 }
 
-func makeQuestionBody(msg []model.Message) []byte {
+func makeQuestionBody(msg []ali_model.Message) []byte {
 	conf := config.GetConfig()
 	client := http.Client{Timeout: time.Second * 120}
 	body := &RequestBody{

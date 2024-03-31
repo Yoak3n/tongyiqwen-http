@@ -14,7 +14,7 @@ func RunRouter() {
 	v1 := r.Group("/v1")
 	v1.POST("/chat", api.Ask)
 	v1.GET("/chat/reset/:id", api.Reset)
-	//v1.POST("/chat/completions",api.AskCompletions)
+	v1.POST("/chat/completions", api.AskCompletions)
 	v1.POST("/preset", api.Upload)
 	v1.GET("/preset", api.GetPreset)
 	err := r.Run(fmt.Sprintf(":%d", config.GetConfig().Port))
