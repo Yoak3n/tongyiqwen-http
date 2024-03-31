@@ -7,7 +7,7 @@ type Aliyun large model authorization keys in `config.yaml`,reference `config.ex
 
 ## Usage
 ### Ask
-POST `/v1/ask` with question to quickly ask tongyiqianwen 
+POST `/v1/chat` with question to quickly ask tongyiqianwen 
 ```json
 {
   "id": "test",
