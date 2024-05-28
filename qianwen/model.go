@@ -1,23 +1,29 @@
 package qianwen
 
-import "tongyiqwen/package/ali_model"
+import (
+	"tongyiqwen/package/openai_model"
+)
 
 type Parameters struct {
-	ResultFormat      string   `json:"ResultFormat,omitempty"`
-	TopK              int      `json:"TopK,omitempty"`
-	Seed              int      `json:"Seed,omitempty"`
-	Temperature       float64  `json:"Temperature,omitempty"`
-	MaxNewTokens      int      `json:"MaxNewTokens,omitempty"`
-	Stop              []string `json:"Stop,omitempty"`
-	IncrementalOutput bool     `json:"IncrementalOutput,omitempty"`
+	ResultFormat      string   `json:"result_format,omitempty"`
+	TopK              int      `json:"topK,omitempty"`
+	Seed              int      `json:"seed,omitempty"`
+	Temperature       float64  `json:"temperature,omitempty"`
+	MaxNewTokens      int      `json:"max_newTokens,omitempty"`
+	Stop              []string `json:"stop,omitempty"`
+	IncrementalOutput bool     `json:"incremental_output,omitempty"`
 }
 type RequestBody struct {
-	RequestId  string `json:"RequestId"`
-	AppId      string `json:"AppId"`
-	Stream     bool   `json:"Stream"`
-	Messages   []ali_model.Message
-	TopP       float64     `json:"TopP,omitempty"`
-	Parameters *Parameters `json:"Parameters,omitempty"`
+	RequestId  string      `json:"requestId"`
+	Stream     bool        `json:"stream"`
+	Model      string      `json:"model"`
+	Input      Input       `json:"input"`
+	TopP       float64     `json:"topP,omitempty"`
+	Parameters *Parameters `json:"parameters,omitempty"`
+}
+
+type Input struct {
+	Messages []openai_model.Message `json:"messages"`
 }
 
 type Choice struct {

@@ -5,12 +5,9 @@ import (
 )
 
 type Config struct {
-	Port            int    `yaml:"port"`
-	AccessKey       string `yaml:"access_key"`
-	AccessSecretKey string `yaml:"access_secret_key"`
-	AppID           string `yaml:"app_id"`
-	AgentKey        string `yaml:"agent_key"`
-	Token           string `yaml:"token"`
+	Port   int    `yaml:"port"`
+	Model  string `yaml:"model"`
+	APIkey string `yaml:"api_key"`
 }
 
 var (
@@ -24,6 +21,7 @@ func init() {
 	v.SetConfigType("yaml")
 	v.AddConfigPath(".")
 	v.SetDefault("port", 20104)
+	v.SetDefault("model", "qwen-turbo")
 	err := v.ReadInConfig()
 	if err != nil {
 		return
@@ -34,23 +32,12 @@ func init() {
 	//	return
 	//}
 	v.WatchConfig()
-	conf.AgentKey = v.GetString("agent_key")
-	conf.AppID = v.GetString("app_id")
-	conf.AccessKey = v.GetString("access_key")
-	conf.AccessSecretKey = v.GetString("access_secret_key")
+
 	conf.Port = v.GetInt("port")
-	conf.Token = v.GetString("token")
+	conf.APIkey = v.GetString("api_key")
+	conf.Model = v.GetString("model")
 
 }
 func GetConfig() *Config {
 	return conf
-}
-
-func RefreshToken(token string) {
-	v.Set("token", token)
-	conf.Token = token
-	err := v.WriteConfig()
-	if err != nil {
-		return
-	}
 }

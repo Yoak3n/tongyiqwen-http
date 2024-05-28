@@ -5,17 +5,18 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/tidwall/gjson"
 	"net/http"
 	"time"
 	"tongyiqwen/config"
 	"tongyiqwen/package/ali_model"
 	"tongyiqwen/package/openai_model"
 	"tongyiqwen/plugin"
+
+	"github.com/tidwall/gjson"
 )
 
 type Conversations struct {
-	Sub    map[string][]ali_model.Message
+	Sub    map[string][]openai_model.Message
 	Update map[string]int64
 }
 
@@ -25,33 +26,34 @@ var convs *Conversations
 
 func init() {
 	convs = new(Conversations)
-	convs.Sub = make(map[string][]ali_model.Message)
+	convs.Sub = make(map[string][]openai_model.Message)
 	convs.Update = make(map[string]int64)
 }
 
 func NewConversation(id string, preset string, question string) string {
-	newMsg := make([]ali_model.Message, 0)
+	newMsg := make([]openai_model.Message, 0)
 	if preset != "" {
 		p, err := plugin.LoadTextPreset(preset)
 		if err != nil {
 			m, e := plugin.LoadMapPreset(preset)
 			if e != nil {
-				newMsg = append(newMsg, ali_model.Message{Role: "system", Content: DefaultPreset})
+				newMsg = append(newMsg, openai_model.Message{Role: "system", Content: DefaultPreset})
 			} else {
 				newMsg = m
 			}
 		} else {
-			newMsg = append(newMsg, ali_model.Message{Role: "system", Content: p})
+			newMsg = append(newMsg, openai_model.Message{Role: "system", Content: p})
 		}
 	} else {
-		newMsg = append(newMsg, ali_model.Message{Role: "system", Content: DefaultPreset})
+		newMsg = append(newMsg, openai_model.Message{Role: "system", Content: DefaultPreset})
 	}
 	convs.Sub[id] = newMsg
 	convs.Update[id] = time.Now().Unix()
 	if question == "" {
 		return fmt.Sprintf("Load preset %s successfully", preset)
 	}
-	convs.Sub[id] = append(newMsg, ali_model.Message{Role: "user", Content: question})
+	fmt.Println(newMsg)
+	convs.Sub[id] = append(newMsg, openai_model.Message{Role: "user", Content: question})
 	count := 0
 	for {
 		if count > 3 {
@@ -61,6 +63,7 @@ func NewConversation(id string, preset string, question string) string {
 		answer := makeQuestionBody(convs.Sub[id])
 		reply, err := checkAndRefresh(answer, id)
 		if err != nil {
+			fmt.Println(err)
 			continue
 		}
 		return reply
@@ -68,7 +71,7 @@ func NewConversation(id string, preset string, question string) string {
 }
 
 func ContinueConversation(id string, question string) string {
-	newMsg := []ali_model.Message{
+	newMsg := []openai_model.Message{
 		{Role: "user", Content: question},
 	}
 	convs.Sub[id] = append(convs.Sub[id], newMsg...)
@@ -78,32 +81,33 @@ func ContinueConversation(id string, question string) string {
 	for {
 		count++
 		answer := makeQuestionBody(convs.Sub[id])
-		reply, err := checkAndRefresh(answer, id)
-		if err != nil {
+		reply, e := checkAndRefresh(answer, id)
+		if e != nil {
 			if count > 3 {
-				return err.Error()
+				return e.Error()
 			}
+		} else {
+			return reply
 		}
-		return reply
+
 	}
 
 }
 
 func checkAndRefresh(answer []byte, id string) (string, error) {
 	jResult := gjson.ParseBytes(answer)
-	reply := jResult.Get("Data.Choices").Array()
+	reply := jResult.Get("output.choices").Array()
 	if len(reply) > 0 {
-		r := reply[0].Get("Message.Content").String()
-		convs.Sub[id] = append(convs.Sub[id], ali_model.Message{
+		r := reply[0].Get("message.content").String()
+		convs.Sub[id] = append(convs.Sub[id], openai_model.Message{
 			Role:    "assistant",
 			Content: r,
 		})
 		convs.Update[id] = time.Now().Unix()
 		return r, nil
 	} else {
-		CreateToken()
 		time.Sleep(time.Second)
-		return "", errors.New(jResult.Get("Message").String())
+		return "", errors.New(jResult.Get("output.text").String())
 	}
 }
 
@@ -136,23 +140,22 @@ func AskWithOpenAIStyle(data *openai_model.RequestBody) (*openai_model.ResponseB
 	body := &RequestBody{
 		Stream:    true,
 		RequestId: data.Id,
-		AppId:     conf.AppID,
 		Parameters: &Parameters{
 			ResultFormat: "text",
 		},
 	}
 	if data.Prompt != "" {
 		oip, _ := plugin.LoadTextPreset(data.Model)
-		body.Messages = append(body.Messages, ali_model.Message{
+		body.Input.Messages = append(body.Input.Messages, openai_model.Message{
 			Role:    "system",
 			Content: oip,
-		}, ali_model.Message{
+		}, openai_model.Message{
 			Role:    "user",
 			Content: data.Prompt,
 		})
 	} else {
 		for _, v := range data.Messages {
-			body.Messages = append(body.Messages, ali_model.Message{
+			body.Input.Messages = append(body.Input.Messages, openai_model.Message{
 				Role:    v.Role,
 				Content: v.Content,
 			})
@@ -176,7 +179,7 @@ func AskWithOpenAIStyle(data *openai_model.RequestBody) (*openai_model.ResponseB
 	//}
 	//req.Header.Set("Accept", "text/event-stream")
 	req.Header.Set("Content-Type", "application/json;charset=UTF-8")
-	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", conf.Token))
+	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", conf.APIkey))
 
 	res, e := client.Do(req)
 	if e != nil {
@@ -188,7 +191,7 @@ func AskWithOpenAIStyle(data *openai_model.RequestBody) (*openai_model.ResponseB
 	fmt.Println(string(content))
 	resp := &ali_model.ResponseBody{}
 	err = json.Unmarshal(content, resp)
-	if len(resp.Data.Choices) <= 0 {
+	if len(resp.Data.Choices) <= 0 || err != nil {
 		return nil, errors.New("no data")
 	}
 	message := &openai_model.ResponseBody{

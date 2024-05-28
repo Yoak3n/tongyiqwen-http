@@ -4,27 +4,31 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/google/uuid"
 	"io"
 	"net/http"
 	"time"
 	"tongyiqwen/config"
-	"tongyiqwen/package/ali_model"
+	"tongyiqwen/package/openai_model"
+
+	"github.com/google/uuid"
 )
 
-const QianwenApiUrl = "https://bailian.aliyuncs.com/v2/app/completions"
+const QianwenApiUrl = "https://dashscope.aliyuncs.com/api/v1/services/aigc/text-generation/generation"
 
 func genRequestId() string {
 	return uuid.New().String()
 }
 
-func makeQuestionBody(msg []ali_model.Message) []byte {
+func makeQuestionBody(msg []openai_model.Message) []byte {
 	conf := config.GetConfig()
+	input := Input{
+		Messages: msg,
+	}
 	client := http.Client{Timeout: time.Second * 120}
 	body := &RequestBody{
 		RequestId: genRequestId(),
-		AppId:     conf.AppID,
-		Messages:  msg,
+		Input:     input,
+		Model:     conf.Model,
 		Parameters: &Parameters{
 			ResultFormat: "message",
 		},
@@ -41,24 +45,22 @@ func makeQuestionBody(msg []ali_model.Message) []byte {
 	}
 	req.Header.Set("Content-Type", "application/json;charset=UTF-8")
 	//req.Header.Set("Accept", "text/event-stream")
-	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", conf.Token))
-	content := make([]byte, 0)
+	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", conf.APIkey))
 	// 为了防止token过期，这里需要重试
 
 	res, e := client.Do(req)
 	if e != nil {
-		return []byte(err.Error())
+		return []byte(e.Error())
 	}
 	if res.StatusCode != http.StatusOK {
 		res.Body.Close()
-		CreateToken()
 		time.Sleep(time.Second)
 	}
-	content, e = io.ReadAll(res.Body)
+	content, e := io.ReadAll(res.Body)
 	fmt.Println(string(content))
-	if err != nil {
+	if e != nil {
 		res.Body.Close()
-		return []byte(err.Error())
+		return []byte(e.Error())
 	} else {
 		res.Body.Close()
 		return content

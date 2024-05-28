@@ -12,7 +12,7 @@ POST `/v1/chat` with question to quickly ask tongyiqianwen
 {
   "id": "test",
   "preset": "translator",
-  "question": "test"
+  "content": "test"
 }
 ```
 if `preset` is not blank,server will create a new conversation,so make it empty after beginning conversation

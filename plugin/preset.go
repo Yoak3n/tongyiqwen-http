@@ -2,10 +2,12 @@ package plugin
 
 import (
 	"errors"
-	"github.com/spf13/viper"
-	"github.com/tidwall/gjson"
 	"os"
 	"tongyiqwen/package/ali_model"
+	"tongyiqwen/package/openai_model"
+
+	"github.com/spf13/viper"
+	"github.com/tidwall/gjson"
 )
 
 type Preset struct {
@@ -39,7 +41,7 @@ func LoadTextPreset(name string) (string, error) {
 }
 
 // LoadMapPreset 从preset.json中加载消息预设
-func LoadMapPreset(name string) ([]ali_model.Message, error) {
+func LoadMapPreset(name string) ([]openai_model.Message, error) {
 	file, err := os.ReadFile("preset.json")
 	if err != nil {
 		return nil, err
@@ -49,15 +51,15 @@ func LoadMapPreset(name string) ([]ali_model.Message, error) {
 	if b == nil {
 		return nil, errors.New("not found preset")
 	}
-	messages := make([]ali_model.Message, 0)
+	messages := make([]openai_model.Message, 0)
 	l := len(b)
 	for index, result := range b {
 		if index == l {
-			if role := result.Get("Role").String(); role != "assistant" {
+			if role := result.Get("role").String(); role != "assistant" {
 				break
 			}
 		}
-		message := ali_model.Message{Role: result.Get("Role").String(), Content: result.Get("Content").String()}
+		message := openai_model.Message{Role: result.Get("role").String(), Content: result.Get("content").String()}
 		messages = append(messages, message)
 
 	}
