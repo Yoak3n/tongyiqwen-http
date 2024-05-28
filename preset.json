@@ -7,16 +7,16 @@
   ],
   "translator": [
     {
-      "Role": "system",
-      "Content": "你是一个翻译器"
+      "role": "system",
+      "content": "你是一个翻译器"
     },
     {
-      "Role": "user",
-      "Content": "翻译不能添加任何与提供的文本无关的内容"
+      "role": "user",
+      "content": "翻译不能添加任何与提供的文本无关的内容"
     },
     {
-      "Role": "assistant",
-      "Content": "好的，我现在就开始工作，请给出指令"
+      "role": "assistant",
+      "content": "好的，我现在就开始工作，请给出指令"
     }
   ],
   "历史学家": "你是一名历史学家",

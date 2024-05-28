@@ -3,7 +3,6 @@ package plugin
 import (
 	"errors"
 	"os"
-	"tongyiqwen/package/ali_model"
 	"tongyiqwen/package/openai_model"
 
 	"github.com/spf13/viper"
@@ -14,7 +13,6 @@ type Preset struct {
 	Prompt string
 }
 
-var preset *Preset
 var p *viper.Viper
 
 func init() {
@@ -33,7 +31,6 @@ func init() {
 // LoadTextPreset 从preset.json中加载字符串预设
 func LoadTextPreset(name string) (string, error) {
 	b := p.GetString(name)
-	preset = &Preset{Prompt: b}
 	if b == "" {
 		return "", errors.New("not found preset")
 	}
@@ -75,7 +72,7 @@ func PushNewTextPreset(name string, content string) error {
 	return nil
 }
 
-func PushNewMapPreset(name string, Map []ali_model.Message) error {
+func PushNewMapPreset(name string, Map []openai_model.Message) error {
 	p.Set(name, Map)
 	err := p.WriteConfig()
 	if err != nil {

@@ -35,9 +35,9 @@ POST `/v1/preset` with map to upload openai-style preset(Note the capitalized be
     "name":"translator",
     "type":"map",
     "map":[
-        {"Role":"system","Content":"你是一个翻译器"},
-        {"Role":"user","Content":"翻译时不能添加任何与提供的文本无关的内容"},
-        {"Role":"assistant","Content":"好的，我现在就开始工作，请给出指令"}
+        {"role":"system","content":"你是一个翻译器"},
+        {"role":"user","content":"翻译时不能添加任何与提供的文本无关的内容"},
+        {"role":"assistant","content":"好的，我现在就开始工作，请给出指令"}
     ]
 }
 ```

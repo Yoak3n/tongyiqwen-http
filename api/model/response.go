@@ -1,6 +1,8 @@
 package api
 
-import "tongyiqwen/package/ali_model"
+import (
+	"tongyiqwen/package/openai_model"
+)
 
 type RequestBody struct {
 	Id      string `json:"id"`
@@ -9,8 +11,8 @@ type RequestBody struct {
 }
 
 type UploadPreset struct {
-	Name string              `json:"name"`
-	Type string              `json:"type"`
-	Text string              `json:"text,omitempty"`
-	Map  []ali_model.Message `json:"map,omitempty"`
+	Name string                 `json:"name"`
+	Type string                 `json:"type"`
+	Text string                 `json:"text,omitempty"`
+	Map  []openai_model.Message `json:"map,omitempty"`
 }
